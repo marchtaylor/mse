@@ -23,7 +23,7 @@ plot(Y~Fbar, res)
 grid()
 newdat <- data.frame(Fbar=seq(min(res$Fbar), max(res$Fbar), len=1000))
 spl <- smooth.spline(x=res$Fbar, y=res$Y, spar = 0.2)
-newdat$Y <- predict(spl, x=newdat$Fbar)$y
+newdat$Y <- predict(spl,  x=newdat$Fbar)$y
 head(newdat)
 lines(Y ~ Fbar, newdat)
 Fmsy <- newdat$Fbar[which.max(newdat$Y)]
