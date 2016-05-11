@@ -9,7 +9,7 @@ load(file="loop_multi.Rdata")
 rn_pars <- colnames(loop_multi)
 loop_multi
 res <- loop_multi
-for(rn in seq(nrow(dat5))){
+for(rn in seq(nrow(res))){
   load(file=paste0(results_path, "stkReal_", paste(rn_pars, loop_multi[rn,], sep="_", collapse="_"), ".Rdata") )
   nyear <- dims(stkReal)$year
   res$Y[rn] <- median(stkReal@catch[,(nyear-5):nyear])
