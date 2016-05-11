@@ -37,8 +37,14 @@ stockReal=NULL, assessErr=NULL, alpha=1,
   if(method == "VPA"){
     # create subset of stock and indices
     stockSub <- window(iter(stock, iter), start=minyear, end=maxyear)
+    
+    # take terminal F from previous years average
+    DIMS <- dim(stockSub@stock.n)
+    range(stockSub)
+    stockSub@harvest[,ac(maxyear)] <- apply(stockSub@harvest[,ac((maxyear-3):(maxyear-1))], 1, mean)    
+  
     # run VPA
-    res <- VPA(stockSub)#, fratio = fratio, fit.plusgroup = fit.plusgroup, desc = desc)
+    res <- FLAssess::VPA(stockSub) #, fratio = fratio, fit.plusgroup = fit.plusgroup, desc = desc)
     stockSub <- stockSub + res
   }
   

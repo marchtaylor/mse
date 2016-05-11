@@ -1,12 +1,15 @@
 
 ### Setup --------------------------------------------------------------
 # setwd("/home/")
-results_path <- "results/msy_brute/"
+results_path <- "results/msy_xsa/"
 dir.create(results_path)
 
 
 # General settings
-idxCV <- 0.38
+assess_method <- "XSA" # momentarily only "XSA and "brute" are available. (XSA is significantly slower)
+assCV <- 0.1 # assessment error (coeff. of variation) for use with "brute" method
+idxCV <- 0.38 # survey index (CPUE) error (coeff. of variation). For use with "XSA" method
+catchCV <- 0 # error in catch datat (coeff. of variation)
 nyear <- 10
 niter <- 10
 wts.nyears <- 5
@@ -108,7 +111,6 @@ for(i in seq(idxReal)){
 sd(log(c(idxErr[[1]]@index[3,ac(year_seq),,,,]))); idxCV # a check
 
 # Assessment error (for use with assessment method = "Restrepo")
-assCV <- 0.1
 assErr <- FLQuant(rep(1, prod(dim(stkReal@stock.n))), dimnames = dimnames(stkReal@stock.n))
 assErrDim <- dim(stkReal@stock.n[,ac(year_seq)])
 assErr[,ac(year_seq)] <- rlnorm(prod(assErrDim), meanlog = 0, sdlog = assCV)
@@ -116,7 +118,6 @@ sd(log(c(assErr[3,ac(year_seq),,,,]))); assCV # a check
 # plot(assErr)
 
 # Catch numbers error
-catchCV <- 0
 catchErr <- FLQuant(rep(1, prod(dim(stkReal@catch.n))), dimnames = dimnames(stkReal@catch.n))
 catchErrDim <- dim(stkReal@catch.n[,ac(year_seq)])
 catchErr[,ac(year_seq)] <- rlnorm(prod(catchErrDim), meanlog = 0, sdlog = catchCV)
@@ -172,26 +173,32 @@ for (rn in seq(nrow(loop_multi))){
       # record observed catches
       stkObs_nn <- observeCatch(stockReal=stkReal_nn, stockObs=stkObs_nn, obsErr = catchErr)
       
-#       # record real and observed indices (only necessary for XSA)
-#       idxReal_nn <- observeIndex(stock=stkReal_nn, index=idxReal_nn, q.hat=q.hat, obsErr=NULL, minyear = year_seq[1])
-#       idxObs_nn <- observeIndex(stock=stkReal_nn, index=idxObs_nn, q.hat=q.hat, obsErr=idxErr_nn, minyear = year_seq[1])
-#       
-#       # Assess stock from catch and indices (only XSA)
-#       stkObs_nn <- assessStock(
-#         stock = stkObs_nn, index = idxObs_nn,
-#         control = xsaCtrl,
-#         maxyear = year_seq[ii],
-#         method = "XSA"
-#       )
+      # assess stock
+      if(assess_method == "XSA"){
+        # record real and observed indices (only necessary for XSA)
+        idxReal_nn <- observeIndex(stock=stkReal_nn, index=idxReal_nn, q.hat=q.hat, obsErr=NULL, minyear = year_seq[1])
+        idxObs_nn <- observeIndex(stock=stkReal_nn, index=idxObs_nn, q.hat=q.hat, obsErr=idxErr_nn, minyear = year_seq[1])
+        
+        # Assess stock from catch and indices (only XSA)
+        stkObs_nn <- assessStock(
+          stock = stkObs_nn, index = idxObs_nn,
+          control = xsaCtrl,
+          maxyear = year_seq[ii],
+          method = "XSA"
+        )
+      }
       
-      # Assess stock
-      stkObs_nn <- assessStock(
-        stock = stkObs_nn,
-        minyear = year_seq[ii]-1,
-        maxyear = year_seq[ii],
-        method = "brute",
-        stockReal=stkReal_nn, assessErr=assErr_nn, alpha=1
-      )
+
+      if(assess_method == "brute"){
+        # Quick assessment of stock from numbers in stkReal plus error
+        stkObs_nn <- assessStock(
+          stock = stkObs_nn,
+          minyear = year_seq[ii]-1,
+          maxyear = year_seq[ii],
+          method = "brute",
+          stockReal=stkReal_nn, assessErr=assErr_nn, alpha=1
+        )
+      }
       
       print(paste("iter =", x, "; year =", year_seq[ii]))
     }
@@ -232,8 +239,6 @@ for (rn in seq(nrow(loop_multi))){
       iter(idxObs[[lev]], n) <- res[[n]]$idxObs_nn[[lev]]
     }
   }
-  
-  
   
   ### Output / Analysis -------------------------------------------------------
   
