@@ -9,7 +9,7 @@ dir.create(results_path)
 assess_method <- "XSA" # momentarily only "XSA and "brute" are available. (XSA is significantly slower)
 assCV <- 0.1 # assessment error (coeff. of variation) for use with "brute" method
 idxCV <- 0.38 # survey index (CPUE) error (coeff. of variation). For use with "XSA" method
-catchCV <- 0 # error in catch datat (coeff. of variation)
+catchCV <- 0 # error in catch data (coeff. of variation)
 nyear <- 10
 niter <- 10
 wts.nyears <- 5

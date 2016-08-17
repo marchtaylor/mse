@@ -60,7 +60,7 @@ stockReal=NULL, assessErr=NULL, alpha=1,
     Zs <-  (stockRealSub@m + stockRealSub@harvest) # natural death numbers
     for(i in seq(DIMS[1])){
       if(i < (DIMS[1])){ Ns[i+1,ac(maxyear+1)] <- (Ns[i,ac(maxyear)] * exp(-Zs[i,ac(maxyear)])) }
-      if(i == DIMS[1]){ Ns[i,ac(maxyear+1)] <- Ns[i,ac(maxyear+1)] + (Ns[i,ac(maxyear)] * exp(-Zs[i,ac(maxyear)])) }
+      if(i == DIMS[1]){ Ns[i,ac(maxyear+1)] <- Ns[i,ac(maxyear+1)] + (Ns[i,ac(maxyear)] * exp(-Zs[i,ac(maxyear)])) } # terminal year
     }
     Fs <- stockSub@harvest
     Ms <- stockSub@m
